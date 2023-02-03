@@ -1,2 +1,25 @@
 class CatsController < ApplicationController
+    def index
+        cats = Cat.all
+        render json: cats 
+    end
+
+    def create
+        cat = Cat.create(cat_params)
+        if cat.valid?
+            render json: cat
+        end
+    end
+
+    def update
+    end
+
+    def destroy
+    end
+
+    # Strong Param
+    private
+    def cat_params
+        params.require(:cat).permit(:name,:age,:enjoys,:image)
+    end
 end
