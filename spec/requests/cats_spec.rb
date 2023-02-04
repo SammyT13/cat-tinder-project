@@ -3,48 +3,70 @@ require 'rails_helper'
 RSpec.describe "Cats", type: :request do
   describe "GET /index" do
     it 'returns all the cats' do
-      # create a db entry
+      # create a database entry
       Cat.create(
         name: 'Kevin',
         age: 9,
         enjoys: 'looking out the window',
-        image: 'https://media.istockphoto.com/id/1361956153/photo/black-cat-sticking-out-tongue-funny-portrait.jpg?b=1&s=170667a&w=0&k=20&c=O6mSvSQiiXT-8Vgfc71ScUQ8manUnq-dtcKTwSCq_bY='
+        image: 'https://images.unsplash.com/photo-1607374035509-704bee7e1aa2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTJ8fGNhdCUyMGNhcnRvb258ZW58MHx8MHx8&auto=format&fit=crop&w=400&q=60'
       )
-      # make a request: HTTP Verb: GET
+
+      # make a request. http verb with url
       get '/cats'
 
-      # To See the response coming back to the request
-        # p response
-        
-      # Two ways to test:
+      # to see the response to the request
+      # p response
       cat = JSON.parse(response.body)
-  
-      expect(cat.length).to equal(1) # This gets the length of our array (1)
-      expect(response).to have_http_status(200) # This tests the Status Code (success)
+      # p "cat:", cat
+      expect(response).to have_http_status(200)
+      expect(cat.length).to eq(1)
+
     end
   end
 
-  describe "Post /create" do
-    it 'creates a cat' do
+  describe "POST /create" do
+    it "creates a cat" do
       cat_params = {
         cat: {
           name: 'Kevin',
           age: 9,
           enjoys: 'looking out the window',
-          image: 'https://media.istockphoto.com/id/1361956153/photo/black-cat-sticking-out-tongue-funny-portrait.jpg?b=1&s=170667a&w=0&k=20&c=O6mSvSQiiXT-8Vgfc71ScUQ8manUnq-dtcKTwSCq_bY='
+          image: 'https://images.unsplash.com/photo-1607374035509-704bee7e1aa2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTJ8fGNhdCUyMGNhcnRvb258ZW58MHx8MHx8&auto=format&fit=crop&w=400&q=60'
         }
       }
-      # make a request to create: HTTP Verb: POST
+
+      # make request for create endpoint
       post '/cats', params: cat_params
 
-      # Test Status Code
+      # status code
       expect(response).to have_http_status(200)
 
-      # Test Payload
+      # payload
       cat = Cat.first
-
+      # p "cat:", cat
       expect(cat.name).to eq('Kevin')
-      expect(cat.enjoys).to eq('looking out the window')      
+      expect(cat.enjoys).to eq('looking out the window')
+    end
+
+    it 'will not create a cat missing its name' do
+      # create params
+      cat_params = {
+        cat: {
+          age: 9,
+          enjoys: 'looking out the window',
+          image: 'https://images.unsplash.com/photo-1607374035509-704bee7e1aa2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTJ8fGNhdCUyMGNhcnRvb258ZW58MHx8MHx8&auto=format&fit=crop&w=400&q=60'
+        }
+      }
+
+      # make request for create endpoint
+      post '/cats', params: cat_params
+
+      # failing status code - unprocessable entity 422
+      expect(response).to have_http_status(422)
+      # payload
+      cat = JSON.parse(response.body)
+      p "cat:", cat
+      expect(cat['name']).to include("can't be blank")
     end
   end
 end
